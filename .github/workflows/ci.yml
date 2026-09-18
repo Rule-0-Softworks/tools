@@ -23,8 +23,19 @@ jobs:
 
       - name: Install test tools
         run: |
-          Install-Module Pester -RequiredVersion 6.2.0 -Scope CurrentUser -Force -SkipPublisherCheck
-          Install-Module PSScriptAnalyzer -RequiredVersion 1.24.0 -Scope CurrentUser -Force
+          # PowerShell Gallery can intermittently fail to find an existing version.
+          for ($attempt = 1; $attempt -le 3; $attempt++) {
+            try {
+              Install-Module Pester -RequiredVersion 6.2.0 -Repository PSGallery -Scope CurrentUser -Force -SkipPublisherCheck -ErrorAction Stop
+              Install-Module PSScriptAnalyzer -RequiredVersion 1.24.0 -Repository PSGallery -Scope CurrentUser -Force -ErrorAction Stop
+              break
+            }
+            catch {
+              if ($attempt -eq 3) { throw }
+              Write-Warning "Tool installation failed (attempt $attempt of 3). Retrying in 10 seconds. $($_.Exception.Message)"
+              Start-Sleep -Seconds 10
+            }
+          }
 
       - name: Check PowerShell
         run: |
