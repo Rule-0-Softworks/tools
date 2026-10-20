@@ -50,3 +50,14 @@ jobs:
         run: |
           Import-Module Pester -RequiredVersion 6.2.0
           Invoke-Pester -Path ./tests -CI -Output Detailed
+
+  required-ci:
+    name: required-ci
+    if: always()
+    needs: [powershell]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fail unless every gated job succeeded
+        env:
+          RESULTS: ${{ toJSON(needs.*.result) }}
+        run: echo "$RESULTS" && ! echo "$RESULTS" | grep -Eq 'failure|cancelled|skipped'
