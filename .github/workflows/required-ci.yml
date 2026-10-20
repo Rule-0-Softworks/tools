@@ -1,0 +1,9 @@
+on:
+  pull_request:
+    branches: [dev, main]
+jobs:
+  required-ci:
+    name: required-ci
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "replace with the repo's real checks"
